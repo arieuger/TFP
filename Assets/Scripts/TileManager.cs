@@ -8,14 +8,15 @@ public class TileManager : MonoBehaviour
 {
 
     [SerializeField] private GameObject hoverTile;
+    [SerializeField] private GameObject selectionTile;
     [SerializeField] private float onSelectElevation = 0.15f;
     [SerializeField] private GameObject ground;
     [SerializeField] private Color darkenColor;
 
     private SpriteRenderer _hoverTileSpriteRenderer;
+    private SpriteRenderer _selectionTileSpriteRenderer;
     
     private static TileManager _instance;
-    private bool _shouldBeVisible;
     private GameObject _selectedTile;
 
     public static TileManager Instance
@@ -32,25 +33,26 @@ public class TileManager : MonoBehaviour
     void Start()
     {
         _hoverTileSpriteRenderer = hoverTile.GetComponent<SpriteRenderer>();
-        SetHoverVisible(false);
+        _selectionTileSpriteRenderer = selectionTile.GetComponent<SpriteRenderer>();
+        SetHoverOrSelectVisible(false, true);
+        SetHoverOrSelectVisible(false, false);
     }
 
     public void MoveHoverTo(Vector3 position)
     {
-        SetHoverVisible(true);
+        SetHoverOrSelectVisible(true, true);
         hoverTile.transform.position = position;
     }
 
-    public void SetHoverVisible(bool shouldBeVisible)
+    public void SetHoverOrSelectVisible(bool shouldBeVisible, bool isHover = true)
     {
-        _shouldBeVisible = shouldBeVisible;
-        Color originalColor = _hoverTileSpriteRenderer.color;
+        SpriteRenderer rend = isHover ? _hoverTileSpriteRenderer : _selectionTileSpriteRenderer;
+        Color originalColor = rend.color;
         Color changeColor = originalColor;
 
-        if (shouldBeVisible) changeColor.a = 1;
-        else changeColor.a = 0;
+        changeColor.a = shouldBeVisible ? 1 : 0;
 
-        _hoverTileSpriteRenderer.color = changeColor;
+        rend.color = changeColor;
     }
 
     public void SelectOrUnselectTile(GameObject groundTile)
@@ -67,6 +69,11 @@ public class TileManager : MonoBehaviour
             isChangingTiles = true;
             UnselectTile(_selectedTile, true);
         }
+
+        SetHoverOrSelectVisible(false);
+        selectionTile.transform.position = groundTile.transform.position;
+        SetHoverOrSelectVisible(true, false);
+        
         _selectedTile = groundTile;
         ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().FindAll(g => g.gameObject != groundTile)
             .ForEach(g => g.DarkenTile(darkenColor, isChangingTiles));
@@ -78,6 +85,8 @@ public class TileManager : MonoBehaviour
         ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile(darkenColor, isChangingTiles));
         _selectedTile = null;
         StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
+        SetHoverOrSelectVisible(false, false);
+        SetHoverOrSelectVisible(true);
     }
 
     private IEnumerator SmoothTileMovement(GameObject groundTile, float displacement)
@@ -93,13 +102,14 @@ public class TileManager : MonoBehaviour
         while (elapsedTime < time)
         {
             groundTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
-            hoverTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
+            selectionTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
         groundTile.transform.position = finalPos;
-        hoverTile.transform.position = finalPos;
+        selectionTile.transform.position = finalPos;
+        
     }
     
 }

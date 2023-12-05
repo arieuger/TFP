@@ -27,7 +27,7 @@ public class GroundTileBehaviour : MonoBehaviour
             return;
         }
         
-        TileManager.Instance.SetHoverVisible(false);
+        TileManager.Instance.SetHoverOrSelectVisible(false);
         
     }
 
