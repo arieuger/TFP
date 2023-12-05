@@ -3,33 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-public class GroundSelector : MonoBehaviour
+public class GroundTileBehaviour : MonoBehaviour
 {
+    private Color _originalColor;
     private const float YZOffsetToCenter = 0.2f;
     private GameObject _foundHoverTile;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        
+        _originalColor = GetComponent<SpriteRenderer>().color;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void DarkenTile(Color color)
     {
-        
+        GetComponent<SpriteRenderer>().color = color;
+        GetComponentsInChildren<SpriteRenderer>().ToList().ForEach(s => s.color = color);
     }
 
+    public void LightTile()
+    {
+        GetComponent<SpriteRenderer>().color = _originalColor;
+        GetComponentsInChildren<SpriteRenderer>().ToList().ForEach(s => s.color = _originalColor);
+    }
     private void OnMouseEnter()
     {
         _foundHoverTile = null;
-        
-        Vector3 checkPosition = gameObject.transform.position;
-        checkPosition.y += YZOffsetToCenter;
-
-        Debug.Log(gameObject.name + " - " + gameObject.tag);
         
         Transform childTransform = gameObject.GetComponentsInChildren<Transform>().ToList().Find(g => g.CompareTag("Buildings"));
         if (childTransform != null)
@@ -52,4 +51,5 @@ public class GroundSelector : MonoBehaviour
     {
         if (_foundHoverTile) TileManager.Instance.SelectOrUnselectTile(gameObject);
     }
+    
 }

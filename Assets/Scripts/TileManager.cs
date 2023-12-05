@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TileManager : MonoBehaviour
@@ -8,6 +9,8 @@ public class TileManager : MonoBehaviour
 
     [SerializeField] private GameObject hoverTile;
     [SerializeField] private float onSelectElevation = 0.15f;
+    [SerializeField] private GameObject ground;
+    [SerializeField] private Color darkenColor;
 
     private SpriteRenderer _hoverTileSpriteRenderer;
     
@@ -60,11 +63,14 @@ public class TileManager : MonoBehaviour
     {
         if (_selectedTile != null) UnselectTile(_selectedTile);
         _selectedTile = groundTile;
+        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().FindAll(g => g.gameObject != groundTile)
+            .ForEach(g => g.DarkenTile(darkenColor));
         StartCoroutine(SmoothTileMovement(groundTile, onSelectElevation));
     }
     
     private void UnselectTile(GameObject groundTile)
     {
+        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile());
         _selectedTile = null;
         StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
     }

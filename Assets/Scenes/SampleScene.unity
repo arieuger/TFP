@@ -424,14 +424,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5373371342807068177, guid: ec1a7c510b5c97d24b1fb320995f2642, type: 3}
-      propertyPath: zOffsetToCenter
-      value: 2.67
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373371342807068177, guid: ec1a7c510b5c97d24b1fb320995f2642, type: 3}
-      propertyPath: yZOffsetToCenter
-      value: 0.2
-      objectReference: {fileID: 0}
     - target: {fileID: 8887498458669064103, guid: ec1a7c510b5c97d24b1fb320995f2642, type: 3}
       propertyPath: m_Name
       value: ground-b (1)
@@ -1323,6 +1315,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hoverTile: {fileID: 555229984}
   onSelectElevation: 0.15
+  ground: {fileID: 1763251616}
+  darkenColor: {r: 0.6117647, g: 0.7490196, b: 0.8509804, a: 1}
 --- !u!1001 &2086197915
 PrefabInstance:
   m_ObjectHideFlags: 0
