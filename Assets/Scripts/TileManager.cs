@@ -7,6 +7,7 @@ public class TileManager : MonoBehaviour
 {
 
     [SerializeField] private GameObject hoverTile;
+    [SerializeField] private float onSelectElevation = 0.15f;
 
     private SpriteRenderer _hoverTileSpriteRenderer;
     
@@ -59,19 +60,35 @@ public class TileManager : MonoBehaviour
     {
         if (_selectedTile != null) UnselectTile(_selectedTile);
         _selectedTile = groundTile;
-        Vector3 pos = groundTile.transform.position;
-        pos.y += 0.1f;
-        groundTile.transform.position = pos;
-        hoverTile.transform.position = pos;
+        StartCoroutine(SmoothTileMovement(groundTile, onSelectElevation));
     }
     
     private void UnselectTile(GameObject groundTile)
     {
         _selectedTile = null;
-        Vector3 pos = groundTile.transform.position;
-        pos.y -= 0.1f;
-        groundTile.transform.position = pos;
-        hoverTile.transform.position = pos;
+        StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
+    }
+
+    private IEnumerator SmoothTileMovement(GameObject groundTile, float displacement)
+    {
+        float time = 0.1f;
+        
+        Vector3 startingPos  = groundTile.transform.position;
+        Vector3 finalPos = startingPos;
+        finalPos.y += displacement;
+
+        float elapsedTime = 0;
+        
+        while (elapsedTime < time)
+        {
+            groundTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
+            hoverTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        groundTile.transform.position = finalPos;
+        hoverTile.transform.position = finalPos;
     }
 
 
