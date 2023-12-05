@@ -103,13 +103,15 @@ public class TileManager : MonoBehaviour
         {
             groundTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
             selectionTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
+            if (displacement < 0) hoverTile.transform.position = Vector3.Lerp(startingPos, finalPos, (elapsedTime / time));
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
         groundTile.transform.position = finalPos;
         selectionTile.transform.position = finalPos;
-        
+        hoverTile.transform.position = finalPos;
+
     }
     
 }
