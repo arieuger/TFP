@@ -61,16 +61,21 @@ public class TileManager : MonoBehaviour
 
     private void SelectTile(GameObject groundTile)
     {
-        if (_selectedTile != null) UnselectTile(_selectedTile);
+        bool isChangingTiles = false;
+        if (_selectedTile != null)
+        {
+            isChangingTiles = true;
+            UnselectTile(_selectedTile, true);
+        }
         _selectedTile = groundTile;
         ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().FindAll(g => g.gameObject != groundTile)
-            .ForEach(g => g.DarkenTile(darkenColor));
+            .ForEach(g => g.DarkenTile(darkenColor, isChangingTiles));
         StartCoroutine(SmoothTileMovement(groundTile, onSelectElevation));
     }
     
-    private void UnselectTile(GameObject groundTile)
+    private void UnselectTile(GameObject groundTile, bool isChangingTiles = false)
     {
-        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile());
+        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile(darkenColor, isChangingTiles));
         _selectedTile = null;
         StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
     }
@@ -96,11 +101,5 @@ public class TileManager : MonoBehaviour
         groundTile.transform.position = finalPos;
         hoverTile.transform.position = finalPos;
     }
-
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }

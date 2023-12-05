@@ -15,17 +15,6 @@ public class GroundTileBehaviour : MonoBehaviour
         _originalColor = GetComponent<SpriteRenderer>().color;
     }
 
-    public void DarkenTile(Color color)
-    {
-        GetComponent<SpriteRenderer>().color = color;
-        GetComponentsInChildren<SpriteRenderer>().ToList().ForEach(s => s.color = color);
-    }
-
-    public void LightTile()
-    {
-        GetComponent<SpriteRenderer>().color = _originalColor;
-        GetComponentsInChildren<SpriteRenderer>().ToList().ForEach(s => s.color = _originalColor);
-    }
     private void OnMouseEnter()
     {
         _foundHoverTile = null;
@@ -51,5 +40,39 @@ public class GroundTileBehaviour : MonoBehaviour
     {
         if (_foundHoverTile) TileManager.Instance.SelectOrUnselectTile(gameObject);
     }
+
+    public void DarkenTile(Color color, bool isChangingTiles)
+    {
+        StartCoroutine(SmoothColorChange(_originalColor, color, isChangingTiles));
+    }
+
+
+    public void LightTile(Color color, bool isChangingTiles)
+    {
+        StartCoroutine(SmoothColorChange(color, _originalColor, isChangingTiles));
+    }
+
+    private IEnumerator SmoothColorChange(Color startColor, Color endColor, bool isChangingTiles = false)
+    {
+        float time = 0.1f;
+
+
+        float elapsedTime = 0;
+
+        if (!isChangingTiles)
+        {
+            while (elapsedTime < time)
+            {
+                Color transitioningColor = Color.Lerp(startColor, endColor, (elapsedTime / time));
+                GetComponentsInChildren<SpriteRenderer>().ToList().ForEach(s => s.color = transitioningColor);
+            
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }    
+        }
+        
+        GetComponentsInChildren<SpriteRenderer>().ToList().ForEach(s => s.color = endColor);
+    }
+
     
 }
