@@ -10,15 +10,15 @@ public class TileManager : MonoBehaviour
     [SerializeField] private GameObject hoverTile;
     [SerializeField] private GameObject selectionTile;
     [SerializeField] private float onSelectElevation = 0.15f;
-    [SerializeField] private GameObject ground;
+    [SerializeField] public GameObject ground;
     [SerializeField] private Color darkenColor;
 
     private SpriteRenderer _hoverTileSpriteRenderer;
     private SpriteRenderer _selectionTileSpriteRenderer;
+
+    private GameObject _selectedTile;
     
     private static TileManager _instance;
-    private GameObject _selectedTile;
-
     public static TileManager Instance
     {
         get { return _instance; }
