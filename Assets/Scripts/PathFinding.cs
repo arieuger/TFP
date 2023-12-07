@@ -73,20 +73,7 @@ public class PathFinding : MonoBehaviour
         return new List<PathFindPosition>();
     }
 
-    public List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
-    {
-        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
-            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
-            .FindAll(g => positions.Contains(g.position))
-            .ConvertAll(t => t.gameObject);
-    }
-    
-    public GameObject FindGameObjectByPosition(Vector2 position)
-    {
-        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
-            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
-            .Find(g => g.position.Equals(position)).gameObject;
-    }
+
 
     public float GetManhattenDistance(Vector2 start, Vector2 tile)
     {

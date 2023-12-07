@@ -17,18 +17,29 @@ public class GroundTileBehaviour : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        _foundHoverTile = null;
-        
-        Transform childTransform = gameObject.GetComponentsInChildren<Transform>().ToList().Find(g => g.CompareTag("Buildings"));
-        if (childTransform != null)
+        if (TileManager.Instance.IsTransitionSelectingTile) return;
+        if (TileManager.Instance.TileWithDefensor == null)
         {
-            _foundHoverTile = childTransform.gameObject;
-            TileManager.Instance.MoveHoverTo(gameObject.transform.position);
-            return;
+
+            _foundHoverTile = null;
+
+            Transform childTransform = gameObject.GetComponentsInChildren<Transform>().ToList()
+                .Find(g => g.CompareTag("Buildings"));
+            if (childTransform != null)
+            {
+                _foundHoverTile = childTransform.gameObject;
+                TileManager.Instance.MoveHoverTo(gameObject.transform.position);
+                return;
+            }
+
+            TileManager.Instance.SetHoverOrSelectVisible(false);
         }
-        
-        TileManager.Instance.SetHoverOrSelectVisible(false);
-        
+        else
+        {
+            if (transform.childCount != 0) return;
+            _foundHoverTile = null;
+            TileManager.Instance.MoveHoverTo(gameObject.transform.position);
+        }
     }
 
     private void OnMouseExit()
@@ -38,7 +49,12 @@ public class GroundTileBehaviour : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (_foundHoverTile) TileManager.Instance.SelectOrUnselectTile(gameObject);
+        if (_foundHoverTile && TileManager.Instance.TileWithDefensor == null) TileManager.Instance.SelectOrUnselectTile(gameObject);
+        if (TileManager.Instance.TileWithDefensor != null)
+        {
+            TileManager.Instance.TileWithDefensor = null;
+            TileManager.Instance.SetHoverOrSelectVisible(false);
+        }
     }
 
     public void DarkenTile(Color color, bool isChangingTiles)

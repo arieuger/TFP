@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class EnemyBehaviour : MonoBehaviour
@@ -30,9 +28,12 @@ public class EnemyBehaviour : MonoBehaviour
         Vector2 targetPos = new Vector2();
         
         // Find closest building or enemy
-        TileManager.Instance.ground.GetComponentsInChildren<GroundTileBehaviour>().ToList()
-            .FindAll(g => g.CompareTag("Buildings")).ForEach(t =>
+        TileManager.Instance.ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(t =>
             {
+                
+                if (!t.GetComponentsInChildren<Transform>().ToList()
+                        .Exists(c => c.CompareTag("Buildings") || c.CompareTag("Defensors"))) return;
+                
                 float distance = PathFinding.Instance.GetManhattenDistance(_actualPositionTile.transform.position, t.transform.position);
                 if (distance < closestDistance)
                 {
@@ -41,9 +42,9 @@ public class EnemyBehaviour : MonoBehaviour
                 }
             });
 
-        GameObject targetGo = PathFinding.Instance.FindGameObjectByPosition(targetPos);
+        GameObject targetGo = TileManager.Instance.FindGameObjectByPosition(targetPos);
         _pathFindPositions = PathFinding.Instance.FindPath(_actualPositionTile, targetGo);
-        PathFinding.Instance.FindGameObjectByPositions(_pathFindPositions.ConvertAll(p => p.Position)).ForEach(g =>
+        TileManager.Instance.FindGameObjectByPositions(_pathFindPositions.ConvertAll(p => p.Position)).ForEach(g =>
         {
             g.GetComponent<SpriteRenderer>().color = Color.green;
         });
@@ -64,7 +65,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     private IEnumerator MoveEnemy(PathFindPosition nextPos)
     {
-        GameObject nextParent = PathFinding.Instance.FindGameObjectByPosition(nextPos.Position);
+        GameObject nextParent = TileManager.Instance.FindGameObjectByPosition(nextPos.Position);
         _anim.SetBool(IsMoving, true);
         
         float time = 1f;

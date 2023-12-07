@@ -6,12 +6,14 @@ using UnityEngine;
 
 public class TileManager : MonoBehaviour
 {
-
+    [SerializeField] public GameObject ground;
     [SerializeField] private GameObject hoverTile;
     [SerializeField] private GameObject selectionTile;
     [SerializeField] private float onSelectElevation = 0.15f;
-    [SerializeField] public GameObject ground;
     [SerializeField] private Color darkenColor;
+
+    [HideInInspector] public bool IsTransitionSelectingTile { get; set; }
+    [HideInInspector] public GameObject TileWithDefensor { get; set; } = null;
 
     private SpriteRenderer _hoverTileSpriteRenderer;
     private SpriteRenderer _selectionTileSpriteRenderer;
@@ -42,6 +44,15 @@ public class TileManager : MonoBehaviour
     {
         SetHoverOrSelectVisible(true, true);
         hoverTile.transform.position = position;
+        
+        if (TileWithDefensor != null)
+        {
+            GameObject defensor = TileWithDefensor.GetComponentInChildren<DefensorsBehaviour>().gameObject;
+            GameObject tile = FindGameObjectByPosition(position).gameObject;
+            defensor.transform.parent = tile.transform;
+            defensor.transform.position = tile.transform.position;
+            TileWithDefensor = tile;
+        }
     }
 
     public void SetHoverOrSelectVisible(bool shouldBeVisible, bool isHover = true)
@@ -80,8 +91,10 @@ public class TileManager : MonoBehaviour
         StartCoroutine(SmoothTileMovement(groundTile, onSelectElevation));
     }
     
-    private void UnselectTile(GameObject groundTile, bool isChangingTiles = false)
+    public void UnselectTile(GameObject groundTile, bool isChangingTiles = false)
     {
+        if (groundTile == null && _selectedTile == null) return;
+        if (groundTile == null) groundTile = _selectedTile; // Default value
         ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile(darkenColor, isChangingTiles));
         _selectedTile = null;
         StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
@@ -91,6 +104,8 @@ public class TileManager : MonoBehaviour
 
     private IEnumerator SmoothTileMovement(GameObject groundTile, float displacement)
     {
+        IsTransitionSelectingTile = true;
+        
         float time = 0.1f;
         
         Vector3 startingPos  = groundTile.transform.position;
@@ -112,6 +127,22 @@ public class TileManager : MonoBehaviour
         selectionTile.transform.position = finalPos;
         hoverTile.transform.position = finalPos;
 
+        IsTransitionSelectingTile = false;
+    }
+    
+    public GameObject FindGameObjectByPosition(Vector2 position)
+    {
+        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
+            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
+            .Find(g => g.position.Equals(position)).gameObject;
+    }
+    
+    public List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
+    {
+        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
+            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
+            .FindAll(g => positions.Contains(g.position))
+            .ConvertAll(t => t.gameObject);
     }
     
 }

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Buildings
+  - Defensors
   layers:
   - Default
   - TransparentFX
