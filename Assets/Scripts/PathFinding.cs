@@ -46,6 +46,11 @@ public class PathFinding : MonoBehaviour
         Debug.Log(endPosition.G + " - " + endPosition.H + " - " + endPosition.F);
         
         openList.Add(startPosition);
+
+        startPosition.Position = new Vector2(Mathf.Round(startPosition.Position.x * 100f) / 100f,
+            Mathf.Round(startPosition.Position.y * 100f) / 100f);
+        endPosition.Position = new Vector2(Mathf.Round(endPosition.Position.x * 100f) / 100f,
+            Mathf.Round(endPosition.Position.y * 100f) / 100f);
         
         while (openList.Count > 0)
         {
