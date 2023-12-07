@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DefaultNamespace;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -29,60 +31,78 @@ public class PathFinding : MonoBehaviour
         if (_instance != null && _instance != this) Destroy(this.gameObject);
         else _instance = this;
     }
+    
+    public List<PathFindPosition> FindPath2(GameObject source, GameObject target)
+    {
+        List<PathFindPosition> openList = new List<PathFindPosition>();
+        List<PathFindPosition> closedList = new List<PathFindPosition>();
+       
+        PathFindPosition startPosition = new PathFindPosition(source.transform.position, 0, 100f);
+        startPosition.G = GetManhattenDistance(source.transform.position, startPosition.Position);
+        startPosition.H = GetManhattenDistance(target.transform.position, startPosition.Position);
+        PathFindPosition endPosition = new PathFindPosition(target.transform.position, 100f, 0);
+        endPosition.G = GetManhattenDistance(source.transform.position, endPosition.Position);
+        endPosition.H = GetManhattenDistance(target.transform.position, endPosition.Position);
+        Debug.Log(endPosition.G + " - " + endPosition.H + " - " + endPosition.F);
+        
+        openList.Add(startPosition);
+        
+        while (openList.Count > 0)
+        {
+            PathFindPosition current = openList.OrderBy(x => x.F).First();
+            
+            openList.Remove(current);
+            closedList.Add(current);
+
+            if (current.Position.Equals(endPosition.Position))
+            {
+                Debug.Log("ashjgajshdgha");
+                return GetFinishedList(startPosition, current);
+            }
+            
+            GetNeighbours(current.Position).ForEach(tilePos =>
+            {
+                PathFindPosition tile = new PathFindPosition(tilePos,
+                    GetManhattenDistance(startPosition.Position, tilePos),
+                    GetManhattenDistance(target.transform.position, tilePos));
+
+                if (!closedList.ConvertAll(p => p.Position).Contains(tilePos))
+                {
+                    tile.Previous = current;
+
+                    if (!openList.ConvertAll(p => p.Position).Contains(tilePos))
+                    {
+                        openList.Add(tile);
+                    }
+                }
+            });
+        }
+
+        return new List<PathFindPosition>();
+    }
+
+    private List<PathFindPosition> GetFinishedList(PathFindPosition start, PathFindPosition end)
+    {
+        List<PathFindPosition> finishedList = new List<PathFindPosition>();
+        PathFindPosition current = end;
+        
+        while (current.Position != start.Position)
+        {
+            finishedList.Add(current);
+            current = current.Previous;
+        }
+
+        finishedList.Reverse();
+
+        return finishedList;
+    }
 
     public void FindPath(GameObject source, GameObject target)
     {
-
-        Vector2 sourcePos = source.transform.position;
-        
-        // 1 buscar veciños
-        var neighbours = FindGameObjectByPositions(GetNeighbours(sourcePos));
-
-        List<Vector2> path = new List<Vector2>();
-        path.Add(sourcePos);
-        int counter = 0;
-        while (counter < 50)
-        {
-            float lowestF = 99999F;
-            Vector2 possibleNextPoint = new Vector2();
-
-            neighbours.ForEach(g =>
-            {
-                Vector2 neighbour = g.transform.position;
-                g.GetComponent<SpriteRenderer>().color = Color.red;
-
-                // Calcular distancia a target
-                _g = GetManhattenDistance(sourcePos, neighbour);
-                _h = GetManhattenDistance(target.transform.position, neighbour);
-                
-                if (F < lowestF)
-                {
-                    lowestF = F;
-                    possibleNextPoint = neighbour;
-                    
-                } else if (IsNeighbour(target.transform.position, neighbour) && !path.Contains(neighbour))
-                {
-                    // IsNeighbour(possibleNextPoint, neighbour) &&
-                    
-                    Debug.Log("lkhlkjhlkjhkj");
-                    possibleNextPoint = neighbour;
-                }
-
-            });
-            
-            path.Add(possibleNextPoint);
-            neighbours = FindGameObjectByPositions(GetNeighbours(possibleNextPoint));
-            counter = counter + 1;
-        }
-        
-        path.Add(target.transform.position);
-        
-        FindGameObjectByPositions(path).ForEach(g =>
+        FindGameObjectByPositions(FindPath2(source, target).ConvertAll(p => p.Position)).ForEach(g =>
         {
             g.GetComponent<SpriteRenderer>().color = Color.green;
         });
-        
-        // FindGameObjectByPositions(GetNeighbours(target.transform.position)).ForEach(g => g.GetComponent<SpriteRenderer>().color = Color.blue);
     }
 
     private List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
@@ -91,11 +111,6 @@ public class PathFinding : MonoBehaviour
             .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
             .FindAll(g => positions.Contains(g.position))
             .ConvertAll(t => t.gameObject);
-        
-    }
-
-    private void GetPathPoint(Vector2 startPoint, Vector2 target)
-    {
         
     }
 
@@ -116,19 +131,22 @@ public class PathFinding : MonoBehaviour
         // Mathf.Sqrt(((start.x - tile.x) / 2) ^ 2 + (start.y - tile.y) ^ 2);
         // return Mathf.Abs(start.x >= tile.x ? start.x - tile.x : tile.x - start.x) + 
         //        (Mathf.Abs(start.y >= tile.y ? start.y - tile.y : tile.y - start.y) / 2);
-        return Mathf.Abs(start.x - tile.x) + (Mathf.Abs(start.y - tile.y) / 2);
-    }
-
-    private List<Vector2> FindClosestHToTarget(Vector2 target, float h)
-    {
-        // return GetNeighbours(target).Find(v => GetManhattenDistance(target, v).Equals(h));
-        List<Vector2> returnVectors = new List<Vector2>();
-        GetNeighbours(target).ForEach(v =>
-        {
-            if (GetManhattenDistance(target, v).Equals(h)) returnVectors.Add(v);
-        });
+        // return Mathf.Abs(start.x - tile.x) + (Mathf.Abs(start.y - tile.y) / 2);
         
-        return returnVectors;
+        // distancia tiles en x
+        // return (Math.Abs(start.x) - Math.Abs(tile.x)) / 0.5f + (Math.Abs(start.y) - Math.Abs(tile.y)) / 0.25f;
+        
+        // Convert 2D isometric coordinates to 3D
+        Vector3 a = new Vector3(start.x, start.y * 2 / Mathf.Sqrt(3), 0);
+        Vector3 b = new Vector3(tile.x, tile.y * 2 / Mathf.Sqrt(3), 0);
+
+        // Calculate the Euclidean distance in 3D space
+        float distance3D = Vector3.Distance(a, b);
+
+        // Convert the 3D distance back to 2D isometric space
+        float distance2D = distance3D * Mathf.Sqrt(3) / 2;
+
+        return distance2D;
     }
 
     private bool IsNeighbour(Vector2 target, Vector2 possibleNeighbour)
