@@ -12,12 +12,6 @@ public class PathFinding : MonoBehaviour
     private readonly Vector2 _doVector = new Vector2(-.5f, -.25f);
     private readonly Vector2 _leVector = new Vector2(-.5f, .25f);
     private readonly Vector2 _riVector = new Vector2(.5f, -.25f);
-
-    private float _g; // distancia desde punto inicial
-    private float _h; // distancia desde punto final
-    private float F => _g + _h; // suma
-    
-     
     
     private static PathFinding _instance;
     public static PathFinding Instance
@@ -101,21 +95,16 @@ public class PathFinding : MonoBehaviour
             .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
             .FindAll(g => positions.Contains(g.position))
             .ConvertAll(t => t.gameObject);
-        
+    }
+    
+    public GameObject FindGameObjectByPosition(Vector2 position)
+    {
+        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
+            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
+            .Find(g => g.position.Equals(position)).gameObject;
     }
 
-    private List<Vector2> GetNeighbours(Vector2 center)
-    {
-        var neighbours = new List<Vector2>();
-        neighbours.Add(center + _upVector);
-        neighbours.Add(center + _doVector);
-        neighbours.Add(center + _leVector);
-        neighbours.Add(center + _riVector);
-        return neighbours;
-    }
-    
-    
-    private float GetManhattenDistance(Vector2 start, Vector2 tile)
+    public float GetManhattenDistance(Vector2 start, Vector2 tile)
     {
         // Convert 2D isometric coordinates to 3D
         Vector3 a = new Vector3(start.x, start.y * 2 / Mathf.Sqrt(3), 0);
@@ -129,5 +118,14 @@ public class PathFinding : MonoBehaviour
 
         return distance2D;
     }
-    
+
+    private List<Vector2> GetNeighbours(Vector2 center)
+    {
+        var neighbours = new List<Vector2>();
+        neighbours.Add(center + _upVector);
+        neighbours.Add(center + _doVector);
+        neighbours.Add(center + _leVector);
+        neighbours.Add(center + _riVector);
+        return neighbours;
+    }
 }
