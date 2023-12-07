@@ -8,7 +8,6 @@ using UnityEngine.Serialization;
 public class GroundTileBehaviour : MonoBehaviour
 {
     private Color _originalColor;
-    private const float YZOffsetToCenter = 0.2f;
     private GameObject _foundHoverTile;
 
     private void Start()

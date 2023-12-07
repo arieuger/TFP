@@ -73,22 +73,6 @@ public class PathFinding : MonoBehaviour
         return new List<PathFindPosition>();
     }
 
-    private List<PathFindPosition> GetFinishedList(PathFindPosition start, PathFindPosition end)
-    {
-        List<PathFindPosition> finishedList = new List<PathFindPosition>();
-        PathFindPosition current = end;
-        
-        while (current.Position != start.Position)
-        {
-            finishedList.Add(current);
-            current = current.Previous;
-        }
-
-        finishedList.Reverse();
-
-        return finishedList;
-    }
-
     public List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
     {
         return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
@@ -119,13 +103,39 @@ public class PathFinding : MonoBehaviour
         return distance2D;
     }
 
+    public Vector2 GetDirectionOfMovement(Vector2 currentPosition, Vector2 previousPosition)
+    {
+        if (currentPosition.Equals(previousPosition + Constants.DoVector)) return Constants.UpVector;
+        if (currentPosition.Equals(previousPosition + Constants.UpVector)) return Constants.DoVector;
+        if (currentPosition.Equals(previousPosition + Constants.RiVector)) return Constants.LeVector;
+        if (currentPosition.Equals(previousPosition + Constants.LeVector)) return Constants.RiVector;
+        
+        return Constants.UpVector;
+    }
+    
     private List<Vector2> GetNeighbours(Vector2 center)
     {
         var neighbours = new List<Vector2>();
-        neighbours.Add(center + _upVector);
-        neighbours.Add(center + _doVector);
-        neighbours.Add(center + _leVector);
-        neighbours.Add(center + _riVector);
+        neighbours.Add(center + Constants.UpVector);
+        neighbours.Add(center + Constants.DoVector);
+        neighbours.Add(center + Constants.LeVector);
+        neighbours.Add(center + Constants.RiVector);
         return neighbours;
+    }
+    
+    private List<PathFindPosition> GetFinishedList(PathFindPosition start, PathFindPosition end)
+    {
+        List<PathFindPosition> finishedList = new List<PathFindPosition>();
+        PathFindPosition current = end;
+        
+        while (current.Position != start.Position)
+        {
+            finishedList.Add(current);
+            current = current.Previous;
+        }
+
+        finishedList.Reverse();
+
+        return finishedList;
     }
 }
