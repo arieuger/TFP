@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DefaultNamespace;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -32,25 +31,20 @@ public class PathFinding : MonoBehaviour
         else _instance = this;
     }
     
-    public List<PathFindPosition> FindPath2(GameObject source, GameObject target)
+    public List<PathFindPosition> FindPath(GameObject source, GameObject target)
     {
         List<PathFindPosition> openList = new List<PathFindPosition>();
         List<PathFindPosition> closedList = new List<PathFindPosition>();
+
+        Vector2 sourcePos = source.transform.position;
+        Vector2 targetPos = target.transform.position;
+        PathFindPosition startPosition = new PathFindPosition(sourcePos, 0, GetManhattenDistance(targetPos, sourcePos));
+        PathFindPosition endPosition = new PathFindPosition(targetPos, GetManhattenDistance(sourcePos, targetPos), 0);
        
-        PathFindPosition startPosition = new PathFindPosition(source.transform.position, 0, 100f);
-        startPosition.G = GetManhattenDistance(source.transform.position, startPosition.Position);
-        startPosition.H = GetManhattenDistance(target.transform.position, startPosition.Position);
-        PathFindPosition endPosition = new PathFindPosition(target.transform.position, 100f, 0);
-        endPosition.G = GetManhattenDistance(source.transform.position, endPosition.Position);
-        endPosition.H = GetManhattenDistance(target.transform.position, endPosition.Position);
-        Debug.Log(endPosition.G + " - " + endPosition.H + " - " + endPosition.F);
-        
         openList.Add(startPosition);
 
-        startPosition.Position = new Vector2(Mathf.Round(startPosition.Position.x * 100f) / 100f,
-            Mathf.Round(startPosition.Position.y * 100f) / 100f);
-        endPosition.Position = new Vector2(Mathf.Round(endPosition.Position.x * 100f) / 100f,
-            Mathf.Round(endPosition.Position.y * 100f) / 100f);
+        startPosition.Position = new Vector2(Mathf.Round(startPosition.Position.x * 100f) / 100f, Mathf.Round(startPosition.Position.y * 100f) / 100f);
+        endPosition.Position = new Vector2(Mathf.Round(endPosition.Position.x * 100f) / 100f, Mathf.Round(endPosition.Position.y * 100f) / 100f);
         
         while (openList.Count > 0)
         {
@@ -61,7 +55,6 @@ public class PathFinding : MonoBehaviour
 
             if (current.Position.Equals(endPosition.Position))
             {
-                Debug.Log("ashjgajshdgha");
                 return GetFinishedList(startPosition, current);
             }
             
@@ -69,7 +62,7 @@ public class PathFinding : MonoBehaviour
             {
                 PathFindPosition tile = new PathFindPosition(tilePos,
                     GetManhattenDistance(startPosition.Position, tilePos),
-                    GetManhattenDistance(target.transform.position, tilePos));
+                    GetManhattenDistance(endPosition.Position, tilePos));
 
                 if (!closedList.ConvertAll(p => p.Position).Contains(tilePos))
                 {
@@ -102,15 +95,7 @@ public class PathFinding : MonoBehaviour
         return finishedList;
     }
 
-    public void FindPath(GameObject source, GameObject target)
-    {
-        FindGameObjectByPositions(FindPath2(source, target).ConvertAll(p => p.Position)).ForEach(g =>
-        {
-            g.GetComponent<SpriteRenderer>().color = Color.green;
-        });
-    }
-
-    private List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
+    public List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
     {
         return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
             .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
@@ -132,15 +117,6 @@ public class PathFinding : MonoBehaviour
     
     private float GetManhattenDistance(Vector2 start, Vector2 tile)
     {
-        // return Mathf.Sqrt(Mathf.Pow((start.x - tile.x) / 2, 2) + Mathf.Pow(start.y - tile.y, 2));
-        // Mathf.Sqrt(((start.x - tile.x) / 2) ^ 2 + (start.y - tile.y) ^ 2);
-        // return Mathf.Abs(start.x >= tile.x ? start.x - tile.x : tile.x - start.x) + 
-        //        (Mathf.Abs(start.y >= tile.y ? start.y - tile.y : tile.y - start.y) / 2);
-        // return Mathf.Abs(start.x - tile.x) + (Mathf.Abs(start.y - tile.y) / 2);
-        
-        // distancia tiles en x
-        // return (Math.Abs(start.x) - Math.Abs(tile.x)) / 0.5f + (Math.Abs(start.y) - Math.Abs(tile.y)) / 0.25f;
-        
         // Convert 2D isometric coordinates to 3D
         Vector3 a = new Vector3(start.x, start.y * 2 / Mathf.Sqrt(3), 0);
         Vector3 b = new Vector3(tile.x, tile.y * 2 / Mathf.Sqrt(3), 0);
@@ -152,16 +128,6 @@ public class PathFinding : MonoBehaviour
         float distance2D = distance3D * Mathf.Sqrt(3) / 2;
 
         return distance2D;
-    }
-
-    private bool IsNeighbour(Vector2 target, Vector2 possibleNeighbour)
-    {
-        return GetNeighbours(target).Contains(possibleNeighbour);
-    }
-    
-    public void PaintNeighbours()
-    {
-        FindGameObjectByPositions(GetNeighbours(new Vector2(0.75f, -1.25f))).ForEach(g => g.GetComponent<SpriteRenderer>().color = Color.blue);
     }
     
 }

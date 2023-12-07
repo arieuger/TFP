@@ -15,6 +15,10 @@ public class EnemyBehaviour : MonoBehaviour
     void Start()
     {
         _actualPositionTile = gameObject.GetComponentInParent<GroundTileBehaviour>().gameObject;
-        PathFinding.Instance.FindPath(_actualPositionTile, target);
+        
+        PathFinding.Instance.FindGameObjectByPositions(PathFinding.Instance.FindPath(_actualPositionTile, target).ConvertAll(p => p.Position)).ForEach(g =>
+        {
+            g.GetComponent<SpriteRenderer>().color = Color.green;
+        });
     }
 }
