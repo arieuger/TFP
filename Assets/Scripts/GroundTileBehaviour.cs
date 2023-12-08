@@ -24,7 +24,7 @@ public class GroundTileBehaviour : MonoBehaviour
             _foundHoverTile = null;
 
             Transform childTransform = gameObject.GetComponentsInChildren<Transform>().ToList()
-                .Find(g => g.CompareTag("Buildings"));
+                .Find(g => g.CompareTag("Buildings") || g.CompareTag("Defensors"));
             if (childTransform != null)
             {
                 _foundHoverTile = childTransform.gameObject;

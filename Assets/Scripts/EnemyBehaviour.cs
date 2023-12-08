@@ -28,7 +28,8 @@ public class EnemyBehaviour : MonoBehaviour
         Vector2 targetPos = new Vector2();
         
         // Find closest building or enemy
-        TileManager.Instance.ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(t =>
+        TileManager.Instance.ground.GetComponentsInChildren<GroundTileBehaviour>().ToList()
+            .FindAll(g => g.transform.position != _actualPositionTile.transform.position).ForEach(t =>
             {
                 
                 if (!t.GetComponentsInChildren<Transform>().ToList()
