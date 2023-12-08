@@ -13,13 +13,15 @@ public class TileManager : MonoBehaviour
     [SerializeField] private Color darkenColor;
 
     [HideInInspector] public bool IsTransitionSelectingTile { get; set; }
-    [HideInInspector] public GameObject TileWithDefensor { get; set; } = null;
+    [HideInInspector] public bool IsStartingSetDefensor { get; set; }
+    [HideInInspector] public GameObject TileWithDefensor { get; set; }
 
     private SpriteRenderer _hoverTileSpriteRenderer;
     private SpriteRenderer _selectionTileSpriteRenderer;
 
     private GameObject _selectedTile;
-    
+    public GameObject SelectedTile => _selectedTile;
+
     private static TileManager _instance;
     public static TileManager Instance
     {
@@ -52,6 +54,10 @@ public class TileManager : MonoBehaviour
             defensor.transform.parent = tile.transform;
             defensor.transform.position = tile.transform.position;
             TileWithDefensor = tile;
+            ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().FindAll(g => g.gameObject != TileWithDefensor)
+                .ForEach(g => g.DarkenTile(darkenColor, !IsStartingSetDefensor));
+            tile.GetComponent<GroundTileBehaviour>().LightTile(darkenColor, !IsStartingSetDefensor);
+            IsStartingSetDefensor = false;
         }
     }
 
@@ -95,11 +101,16 @@ public class TileManager : MonoBehaviour
     {
         if (groundTile == null && _selectedTile == null) return;
         if (groundTile == null) groundTile = _selectedTile; // Default value
-        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile(darkenColor, isChangingTiles));
+        LightAllTiles(isChangingTiles);
         _selectedTile = null;
         StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
         SetHoverOrSelectVisible(false, false);
         SetHoverOrSelectVisible(true);
+    }
+
+    public void LightAllTiles(bool isChangingTiles)
+    {
+        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile(darkenColor, isChangingTiles));
     }
 
     private IEnumerator SmoothTileMovement(GameObject groundTile, float displacement)

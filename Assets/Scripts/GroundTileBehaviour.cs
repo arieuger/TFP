@@ -54,6 +54,7 @@ public class GroundTileBehaviour : MonoBehaviour
         {
             TileManager.Instance.TileWithDefensor = null;
             TileManager.Instance.SetHoverOrSelectVisible(false);
+            TileManager.Instance.LightAllTiles(false);
         }
     }
 

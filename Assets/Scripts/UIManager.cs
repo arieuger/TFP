@@ -30,6 +30,7 @@ public class UIManager : MonoBehaviour
         Instantiate(protestorPrefab, chosenTile.transform.position, Quaternion.identity, chosenTile.transform);
         TileManager.Instance.TileWithDefensor = chosenTile;
         TileManager.Instance.UnselectTile(null);
+        TileManager.Instance.IsStartingSetDefensor = TileManager.Instance.SelectedTile == null;
         TileManager.Instance.MoveHoverTo(chosenTile.transform.position);
     }
 }
