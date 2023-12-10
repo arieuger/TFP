@@ -47,7 +47,7 @@ public class EnemyBehaviour : MonoBehaviour
         _pathFindPositions = PathFinding.Instance.FindPath(_actualPositionTile, targetGo);
         TileManager.Instance.FindGameObjectByPositions(_pathFindPositions.ConvertAll(p => p.Position)).ForEach(g =>
         {
-            g.GetComponent<SpriteRenderer>().color = Color.green;
+            // g.GetComponent<SpriteRenderer>().color = Color.green;
         });
     }
 

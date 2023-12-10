@@ -77,7 +77,23 @@ public class TileManager : MonoBehaviour
         if (_selectedTile == null || _selectedTile != groundTile) SelectTile(groundTile);
         else UnselectTile(groundTile);
     }
+    
+    public void UnselectTile(GameObject groundTile, bool isChangingTiles = false)
+    {
+        if (groundTile == null && _selectedTile == null) return;
+        if (groundTile == null) groundTile = _selectedTile; // Default value
+        LightAllTiles(isChangingTiles);
+        _selectedTile = null;
+        StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
+        SetHoverOrSelectVisible(false, false);
+        SetHoverOrSelectVisible(true);
+    }
 
+    public void LightAllTiles(bool isChangingTiles)
+    {
+        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile(darkenColor, isChangingTiles));
+    }
+    
     private void SelectTile(GameObject groundTile)
     {
         bool isChangingTiles = false;
@@ -97,22 +113,21 @@ public class TileManager : MonoBehaviour
         StartCoroutine(SmoothTileMovement(groundTile, onSelectElevation));
     }
     
-    public void UnselectTile(GameObject groundTile, bool isChangingTiles = false)
+    public GameObject FindGameObjectByPosition(Vector2 position)
     {
-        if (groundTile == null && _selectedTile == null) return;
-        if (groundTile == null) groundTile = _selectedTile; // Default value
-        LightAllTiles(isChangingTiles);
-        _selectedTile = null;
-        StartCoroutine(SmoothTileMovement(groundTile, -onSelectElevation));
-        SetHoverOrSelectVisible(false, false);
-        SetHoverOrSelectVisible(true);
+        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
+            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
+            .Find(g => g.position.Equals(position)).gameObject;
     }
-
-    public void LightAllTiles(bool isChangingTiles)
+    
+    public List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
     {
-        ground.GetComponentsInChildren<GroundTileBehaviour>().ToList().ForEach(g => g.LightTile(darkenColor, isChangingTiles));
+        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
+            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
+            .FindAll(g => positions.Contains(g.position))
+            .ConvertAll(t => t.gameObject);
     }
-
+    
     private IEnumerator SmoothTileMovement(GameObject groundTile, float displacement)
     {
         IsTransitionSelectingTile = true;
@@ -139,21 +154,6 @@ public class TileManager : MonoBehaviour
         hoverTile.transform.position = finalPos;
 
         IsTransitionSelectingTile = false;
-    }
-    
-    public GameObject FindGameObjectByPosition(Vector2 position)
-    {
-        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
-            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
-            .Find(g => g.position.Equals(position)).gameObject;
-    }
-    
-    public List<GameObject> FindGameObjectByPositions(List<Vector2> positions)
-    {
-        return TileManager.Instance.ground.GetComponentsInChildren<Transform>().ToList()
-            .FindAll(g => g.GetComponent<GroundTileBehaviour>() != null)
-            .FindAll(g => positions.Contains(g.position))
-            .ConvertAll(t => t.gameObject);
     }
     
 }
