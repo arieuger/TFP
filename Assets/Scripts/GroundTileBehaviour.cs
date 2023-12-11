@@ -50,12 +50,7 @@ public class GroundTileBehaviour : MonoBehaviour
     private void OnMouseDown()
     {
         if (_foundHoverTile && TileManager.Instance.TileWithDefensor == null) TileManager.Instance.SelectOrUnselectTile(gameObject);
-        if (TileManager.Instance.TileWithDefensor != null)
-        {
-            TileManager.Instance.TileWithDefensor = null;
-            TileManager.Instance.SetHoverOrSelectVisible(false);
-            TileManager.Instance.LightAllTiles(false);
-        }
+        if (TileManager.Instance.TileWithDefensor != null) TileManager.Instance.SelectOrDeactivateTileWithDefensor();
     }
 
     public void DarkenTile(Color color, bool isChangingTiles)

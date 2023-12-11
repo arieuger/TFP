@@ -112,6 +112,14 @@ public class TileManager : MonoBehaviour
             .ForEach(g => g.DarkenTile(darkenColor, isChangingTiles));
         StartCoroutine(SmoothTileMovement(groundTile, onSelectElevation));
     }
+
+    public void SelectOrDeactivateTileWithDefensor()
+    {
+        TileWithDefensor = null;
+        SetHoverOrSelectVisible(false);
+        LightAllTiles(false);
+        UIManager.Instance.EnableOrDisableActionButtons(true);
+    }
     
     public GameObject FindGameObjectByPosition(Vector2 position)
     {
